@@ -389,6 +389,15 @@ class TestGod < Test::Unit::TestCase
     God.running_log('foo', t)
   end
 
+  def test_running_log_should_call_watch_log_since_on_all_logs_in_group
+    God.watch { |w| w.name = 'foo1'; w.start = 'bar1', w.group = 'baz' }
+    God.watch { |w| w.name = 'foo2'; w.start = 'bar2', w.group = 'baz' }
+    God.watch { |w| w.name = 'foo3'; w.start = 'bar3', w.group = 'baz' }
+    t = Time.now
+    LOG.expects(:watch_log_since).with(['foo1', 'foo2', 'foo3'], t)
+    God.running_log('baz', t)
+  end
+
   def test_running_log_should_raise_on_unknown_watch
     God.internal_init
     assert_raise(NoSuchWatchError) do
@@ -599,6 +608,15 @@ class TestGod < Test::Unit::TestCase
     assert_equal %w{ fuzed fuzed2 fuzed22}, God.pattern_match('fu', list)
     assert_equal %w{ mysql }, God.pattern_match('sql', list)
   end
+
+  # group_member_names
+
+  def test_group_member_names
+    God.watch { |w| w.name = 'foo1'; w.start = 'bar1'; w.group = 'baz' }
+    God.watch { |w| w.name = 'foo2'; w.start = 'bar2'; w.group = 'baz' }
+    assert_equal %w{ foo1 foo2 }, God.group_member_names('baz')
+  end
+
 end
 
 

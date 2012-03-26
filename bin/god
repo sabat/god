@@ -35,7 +35,7 @@ begin
       unmonitor <task or group name>     unmonitor task or group
       remove <task or group name>        remove task or group from god
       load <file> [action]               load a config into a running god
-      log <task name>                    show realtime log for given task
+      log <task name or group name>      show realtime log for given task(s)
       status [task or group name]        show status
       signal <task or group name> <sig>  signal all matching tasks
       quit                               stop god

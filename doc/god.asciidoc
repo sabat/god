@@ -864,11 +864,17 @@ $ sudo god log local-3000
 This will display log output for the 'local-3000' Watch and update every
 second with new log messages.
 
-You can also supply a shorthand to the log command that will match one of your
+You can supply a shorthand to the log command that will match one of your
 watches. If it happens to match several, the shortest match will be used:
 
 ```terminal
 $ sudo god log l3
+```
+
+You can watch all the logs from a Watch group by using the group's name:
+
+```terminal
+$ sudo god log all_my_daemons
 ```
 
 /////////////////////////////////////////////////////////////////////////////

@@ -63,22 +63,31 @@ module God
     end
 
     # Get all log output for a given Watch since a certain Time.
-    #   +watch_name+ is the String name of the Watch
+    #   +watch_names+ is either the String name of the Watch or 
+    #   an Array of String names of Watches
     #   +since+ is the Time since which to fetch log lines
     #
     # Returns String
-    def watch_log_since(watch_name, since)
+    def watch_log_since(watch_names, since)
+      watch_names = [ watch_names ] if not watch_names.is_a? Array
       # initialize watch log if necessary
-      self.logs[watch_name] ||= Timeline.new(God::LOG_BUFFER_SIZE_DEFAULT)
+      watch_names.each do |watch_name|
+        self.logs[watch_name] ||= Timeline.new(God::LOG_BUFFER_SIZE_DEFAULT)
+      end
 
       # get and join lines since given time
       @mutex.synchronize do
         @spool = Time.now
-        self.logs[watch_name].select do |x|
-          x.first > since
-        end.map do |x|
-          x[1]
-        end.join
+        all_log_lines = []
+        watch_names.each do |watch_name|
+          log_line = self.logs[watch_name].select do |x|
+            x.first > since
+          end.map do |x|
+            x[1]
+          end.join
+          all_log_lines.push(log_line)
+        end
+        all_log_lines.join
       end
     end
 

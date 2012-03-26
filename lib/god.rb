@@ -531,7 +531,8 @@ module God
 
   # Log lines for the given task since the specified time.
   #
-  # watch_name - The String name of the task (may be abbreviated).
+  # watch_name - The String name of the task (may be abbreviated)
+  #              or the exact String name of a group.
   # since      - The Time since which to report log lines.
   #
   # Raises God::NoSuchWatchError if no tasks matched.
@@ -539,11 +540,19 @@ module God
   def self.running_log(watch_name, since)
     matches = pattern_match(watch_name, self.watches.keys)
 
-    unless matches.first
-      raise NoSuchWatchError.new
+    if matches.empty?
+      if self.groups.has_key?(watch_name)
+        matches = group_member_names(watch_name)
+      else
+        raise NoSuchWatchError.new
+      end
+    else
+      # This could be changed so that it watches the logs from every
+      # matching watch name. Just remove this line below.
+      matches = matches.first
     end
 
-    LOG.watch_log_since(matches.first, since)
+    LOG.watch_log_since(matches, since)
   end
 
   # Load a config file into a running god instance. Rescues any exceptions
@@ -746,6 +755,20 @@ module God
     list.select do |item|
       item =~ Regexp.new(regex)
     end.sort_by { |x| x.size }
+  end
+
+  # Return a list of watch names that belong to the String group name.
+  #
+  # group_name - The String containing the group name.
+  #
+  # Examples
+  #
+  #   foo = God.group_member_names 'foo'
+  #   # => [ 'bar', 'baz' ]
+  def self.group_member_names(group_name)
+    self.groups[group_name].collect do |w|
+      w.name
+    end
   end
 end
 
